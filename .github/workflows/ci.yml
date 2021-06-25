@@ -13,7 +13,7 @@ jobs:
     - uses: Trass3r/setup-cpp@master
     - run: |
         sudo sed -Ei 's/^# deb-src /deb-src /' /etc/apt/sources.list
-        sudo apt update && apt build-dep -y qemu
+        sudo apt update && sudo apt build-dep -y qemu
         sudo apt install -y git clang lld
     - uses: hendrikmuhs/ccache-action@v1
       with:
