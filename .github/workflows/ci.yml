@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: Trass3r/setup-cpp@master
+    - run: |
+        sudo sed -Ei 's/^# deb-src /deb-src /' /etc/apt/sources.list
+        sudo apt update && apt build-dep -y qemu
+        sudo apt install -y git clang lld
+    - uses: hendrikmuhs/ccache-action@v1
+      with:
+        max-size: 5G
+    - name: build
+      run: |
+        ccache -z
+        mkdir build && cd build
+        CC="ccache clang" CXX="ccache clang++" CFLAGS="-O3 -march=skylake -flto=thin" CXXFLAGS="-O3 -march=skylake -flto=thin" LDFLAGS="-fuse-ld=lld -O3 -march=skylake -flto=thin" \
+        ../configure --prefix=$(pwd)/install --static --disable-system --enable-linux-user --enable-lto --disable-stack-protector --disable-pie
+        ninja && ninja install
+        ccache -s
+    - run: cd build/install/ && tar cfa qemu-user-static.tar.xz *
+    - uses: actions/upload-artifact@v2
+      with:
+        name: build
+        path: build/install/qemu-user-static.tar.xz
