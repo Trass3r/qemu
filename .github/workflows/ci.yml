@@ -21,6 +21,7 @@ jobs:
     - name: build
       run: |
         ccache -z
+        sed -i 's/test "$avx2_opt" != "no"/test "$avx2_opt" = "yes"/' configure
         mkdir build && cd build
         CC="ccache clang" CXX="ccache clang++" CFLAGS="-O3 -march=skylake -flto=thin" CXXFLAGS="-O3 -march=skylake -flto=thin" LDFLAGS="-fuse-ld=lld -O3 -march=skylake -flto=thin" \
         ../configure --prefix=$(pwd)/install --static --disable-system --enable-linux-user --enable-lto --disable-stack-protector --disable-pie
